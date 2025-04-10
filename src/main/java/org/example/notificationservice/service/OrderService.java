@@ -7,11 +7,14 @@ import org.example.notificationservice.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderMapper orderMapper;  // Добавляем маппер
+    private final OrderMapper orderMapper;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, OrderMapper orderMapper) {
@@ -19,28 +22,47 @@ public class OrderService {
         this.orderMapper = orderMapper;
     }
 
-    // Синхронная обработка заказа
+
     public OrderDTO createOrder(OrderDTO orderDTO) {
-        // Преобразуем OrderDTO в OrderEntity с помощью маппера
         OrderEntity orderEntity = orderMapper.toEntity(orderDTO);
-
-        // Сохраняем заказ в базе данных
         orderEntity = orderRepository.save(orderEntity);
-
-        // Преобразуем OrderEntity обратно в OrderDTO
         return orderMapper.toDto(orderEntity);
     }
 
-/*    // Асинхронная обработка заказа
-    @Async
-    public void createOrderAsync(OrderDTO orderDTO) {
-        // Преобразуем OrderDTO в OrderEntity с помощью маппера
-        OrderEntity orderEntity = orderMapper.toEntity(orderDTO);
+    public OrderDTO getOrderById(Long id) {
+        Optional<OrderEntity> orderEntity = orderRepository.findById(id);
+        return orderEntity.map(entity -> orderMapper.toDto(entity)).orElse(null);
+    }
 
-        // Сохраняем заказ в базе данных (асинхронно)
-        orderRepository.save(orderEntity);
 
-        // Дополнительная логика по отправке уведомлений или обработке
-        System.out.println("Asynchronously created order: " + orderEntity);
-    }*/
+    public List<OrderDTO> getAllOrders() {
+        List<OrderEntity> orderEntities = orderRepository.findAll();
+        return orderMapper.toDtoList(orderEntities);
+    }
+
+
+    public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
+        Optional<OrderEntity> existingOrder = orderRepository.findById(id);
+        if (existingOrder.isPresent()) {
+            OrderEntity orderEntity = existingOrder.get();
+
+
+            orderMapper.updateEntityFromDto(orderDTO, orderEntity);
+
+            orderEntity = orderRepository.save(orderEntity);
+
+            return orderMapper.toDto(orderEntity);
+        }
+        return null;
+    }
+
+    public boolean deleteOrder(Long id) {
+        Optional<OrderEntity> orderEntity = orderRepository.findById(id);
+        if (orderEntity.isPresent()) {
+            orderRepository.delete(orderEntity.get());
+            return true;
+        }
+        return false;
+    }
+
 }

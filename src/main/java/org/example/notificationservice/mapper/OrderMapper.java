@@ -45,4 +45,22 @@ public class OrderMapper {
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
+    public void updateEntityFromDto(OrderDTO dto, OrderEntity entity) {
+        if (dto == null || entity == null) {
+            return;
+        }
+        if (dto.getItemId() != null) {
+            entity.setItemId(dto.getItemId());
+        }
+        if (dto.getQuantity() != 0) {
+            entity.setQuantity(dto.getQuantity());
+        }
+        if (dto.getOrderDate() != null) {
+            entity.setOrderDate(dto.getOrderDate());
+        }
+        if (dto.getStatus() != null) {
+            entity.setStatus(dto.getStatus());
+        }
+    }
 }
