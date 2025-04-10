@@ -1,5 +1,7 @@
 package org.example.notificationservice.service;
 
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.example.notificationservice.mapper.OrderMapper;
 import org.example.notificationservice.model.OrderDTO;
 import org.example.notificationservice.model.OrderEntity;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -22,37 +25,45 @@ public class OrderService {
         this.orderMapper = orderMapper;
     }
 
-
+    @Transactional
     public OrderDTO createOrder(OrderDTO orderDTO) {
         OrderEntity orderEntity = orderMapper.toEntity(orderDTO);
         orderEntity = orderRepository.save(orderEntity);
-        return orderMapper.toDto(orderEntity);
+        OrderDTO createdOrder = orderMapper.toDto(orderEntity);
+        log.info("Order created successfully with ID: {}", createdOrder.getId());
+        return createdOrder;
     }
 
     public OrderDTO getOrderById(Long id) {
         Optional<OrderEntity> orderEntity = orderRepository.findById(id);
-        return orderEntity.map(entity -> orderMapper.toDto(entity)).orElse(null);
+        if (orderEntity.isPresent()) {
+            OrderDTO orderDTO = orderMapper.toDto(orderEntity.get());
+            log.info("Order with ID {} found: {}", id, orderDTO);
+            return orderDTO;
+        }
+        log.warn("Order with ID {} not found", id);
+        return null;
     }
-
 
     public List<OrderDTO> getAllOrders() {
         List<OrderEntity> orderEntities = orderRepository.findAll();
-        return orderMapper.toDtoList(orderEntities);
+        List<OrderDTO> orders = orderMapper.toDtoList(orderEntities);
+        log.info("Fetched {} orders", orders.size());
+        return orders;
     }
 
-
+    @Transactional
     public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
         Optional<OrderEntity> existingOrder = orderRepository.findById(id);
         if (existingOrder.isPresent()) {
             OrderEntity orderEntity = existingOrder.get();
-
-
             orderMapper.updateEntityFromDto(orderDTO, orderEntity);
-
             orderEntity = orderRepository.save(orderEntity);
-
-            return orderMapper.toDto(orderEntity);
+            OrderDTO updatedOrder = orderMapper.toDto(orderEntity);
+            log.info("Order with ID {} updated successfully", id);
+            return updatedOrder;
         }
+        log.warn("Order with ID {} not found for update", id);
         return null;
     }
 
@@ -60,9 +71,10 @@ public class OrderService {
         Optional<OrderEntity> orderEntity = orderRepository.findById(id);
         if (orderEntity.isPresent()) {
             orderRepository.delete(orderEntity.get());
+            log.info("Order with ID {} deleted successfully", id);
             return true;
         }
+        log.warn("Order with ID {} not found for deletion", id);
         return false;
     }
-
 }
