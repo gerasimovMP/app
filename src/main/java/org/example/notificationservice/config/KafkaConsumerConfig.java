@@ -51,8 +51,8 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-    @Bean
-    public ObjectMapper objectMapper() {
+    @Bean(name = "kafkaObjectMapper")
+    public ObjectMapper kafkaObjectMapper() {
         return new ObjectMapper();
     }
 }

@@ -17,9 +17,9 @@ public class ConsumerService {
     public void listenOrder(OrderDTO orderDTO) {
         try {
             System.out.println("Received order: " + orderDTO);
-            orderService.processOrder(orderDTO);
+            orderService.createOrder(orderDTO); // Теперь вызываем синхронный метод для обработки
+            System.out.println("Order processed successfully: " + orderDTO);
         } catch (Exception e) {
-            // Логирование ошибки или другие действия в случае неудачи
             System.err.println("Error processing order: " + e.getMessage());
         }
     }
