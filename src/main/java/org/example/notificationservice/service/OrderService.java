@@ -77,4 +77,13 @@ public class OrderService {
         log.warn("Order with ID {} not found for deletion", id);
         return false;
     }
+    @Transactional
+    public OrderDTO createOrderSyncViaSoap(OrderDTO orderDTO) {
+        OrderEntity orderEntity = orderMapper.toEntity(orderDTO);
+        orderEntity = orderRepository.save(orderEntity);
+        OrderDTO createdOrder = orderMapper.toDto(orderEntity);
+        log.info("Order created successfully with ID: {}", createdOrder.getId());
+        return createdOrder;
+    }
+
 }
