@@ -2,7 +2,7 @@ package org.example.notificationservice.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.example.notificationservice.mapper.OrderMapper;
+import org.example.notificationservice.mapper.OrdersMapper;
 import org.example.notificationservice.model.OrderDTO;
 import org.example.notificationservice.model.OrderEntity;
 import org.example.notificationservice.repository.OrderRepository;
@@ -17,10 +17,10 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderMapper orderMapper;
+    private final OrdersMapper orderMapper;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper) {
+    public OrderService(OrderRepository orderRepository, OrdersMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.orderMapper = orderMapper;
     }

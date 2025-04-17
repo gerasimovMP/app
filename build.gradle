@@ -17,7 +17,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-    xjc // конфигурация для генерации XSD
+    xjc
 }
 
 repositories {
@@ -33,29 +33,23 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
-
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.0'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0'
-
-    // JAXB для Jakarta EE 10 (Spring Boot 3)
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.2'
     xjc 'org.glassfish.jaxb:jaxb-xjc:4.0.2'
-
-    // WSDL генерация
     implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:3.5.2'
     implementation 'org.apache.cxf:cxf-rt-bindings-xml:3.5.2'
     implementation 'org.apache.cxf:cxf-rt-wsdl:3.5.2'
-
-    // Прочее
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 }
 
 sourceSets {
@@ -86,9 +80,7 @@ task generateXSDClasses(type: JavaExec) {
     args = ['-d', outputDir.absolutePath, '-extension', xsdFile.absolutePath]
 }
 
-// Генерация перед компиляцией
 compileJava.dependsOn generateXSDClasses
-//compileJava.dependsOn generateWSDLClasses // Раскомментировано, если используешь wsimport
 
 tasks.named('bootBuildImage') {
     builder = 'paketobuildpacks/builder-jammy-base:latest'
