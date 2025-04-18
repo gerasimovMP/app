@@ -26,14 +26,14 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.springframework.kafka:spring-kafka'
-    implementation 'org.springframework.boot:spring-boot-starter-web-services'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.0.0'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0'
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
@@ -44,12 +44,15 @@ dependencies {
     implementation 'org.apache.cxf:cxf-rt-wsdl:3.5.2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    runtimeOnly 'org.postgresql:postgresql'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+    testImplementation 'org.testcontainers:postgresql:1.17.6' // Для интеграционных тестов
+    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
 }
 
 sourceSets {
@@ -59,7 +62,6 @@ sourceSets {
         }
     }
 }
-
 
 task generateXSDClasses(type: JavaExec) {
     group = 'build'
@@ -81,6 +83,10 @@ task generateXSDClasses(type: JavaExec) {
 }
 
 compileJava.dependsOn generateXSDClasses
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
 
 tasks.named('bootBuildImage') {
     builder = 'paketobuildpacks/builder-jammy-base:latest'
