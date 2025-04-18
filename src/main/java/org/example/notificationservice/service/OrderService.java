@@ -2,6 +2,7 @@ package org.example.notificationservice.service;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.example.notificationservice.exception.OrderNotFoundException;
 import org.example.notificationservice.mapper.OrdersMapper;
 import org.example.notificationservice.model.OrderDTO;
 import org.example.notificationservice.model.OrderEntity;
@@ -35,14 +36,15 @@ public class OrderService {
     }
 
     public OrderDTO getOrderById(Long id) {
-        Optional<OrderEntity> orderEntity = orderRepository.findById(id);
-        if (orderEntity.isPresent()) {
-            OrderDTO orderDTO = orderMapper.toDto(orderEntity.get());
-            log.info("Order with ID {} found: {}", id, orderDTO);
-            return orderDTO;
-        }
-        log.warn("Order with ID {} not found", id);
-        return null;
+        return orderRepository.findById(id)
+                .map(orderEntity -> {
+                    log.info("Order with ID {} found", id);
+                    return orderMapper.toDto(orderEntity);
+                })
+                .orElseThrow(() -> {
+                    log.warn("Order with ID {} not found", id);
+                    return new OrderNotFoundException("Order not found with id: " + id);
+                });
     }
 
     public List<OrderDTO> getAllOrders() {
@@ -54,17 +56,17 @@ public class OrderService {
 
     @Transactional
     public OrderDTO updateOrder(Long id, OrderDTO orderDTO) {
-        Optional<OrderEntity> existingOrder = orderRepository.findById(id);
-        if (existingOrder.isPresent()) {
-            OrderEntity orderEntity = existingOrder.get();
-            orderMapper.updateEntityFromDto(orderDTO, orderEntity);
-            orderEntity = orderRepository.save(orderEntity);
-            OrderDTO updatedOrder = orderMapper.toDto(orderEntity);
-            log.info("Order with ID {} updated successfully", id);
-            return updatedOrder;
-        }
-        log.warn("Order with ID {} not found for update", id);
-        return null;
+        return orderRepository.findById(id)
+                .map(existingOrder -> {
+                    orderMapper.updateEntityFromDto(orderDTO, existingOrder);
+                    OrderEntity updatedOrder = orderRepository.save(existingOrder);
+                    log.info("Order with ID {} updated successfully", id);
+                    return orderMapper.toDto(updatedOrder);
+                })
+                .orElseThrow(() -> {
+                    log.warn("Order with ID {} not found for update", id);
+                    return new OrderNotFoundException("Order not found with id: " + id);
+                });
     }
 
     public boolean deleteOrder(Long id) {
@@ -77,13 +79,4 @@ public class OrderService {
         log.warn("Order with ID {} not found for deletion", id);
         return false;
     }
-    @Transactional
-    public OrderDTO createOrderSyncViaSoap(OrderDTO orderDTO) {
-        OrderEntity orderEntity = orderMapper.toEntity(orderDTO);
-        orderEntity = orderRepository.save(orderEntity);
-        OrderDTO createdOrder = orderMapper.toDto(orderEntity);
-        log.info("Order created successfully with ID: {}", createdOrder.getId());
-        return createdOrder;
-    }
-
 }

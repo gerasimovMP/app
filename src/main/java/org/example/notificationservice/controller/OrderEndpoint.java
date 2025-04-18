@@ -37,7 +37,7 @@ public class OrderEndpoint {
         }
         orderDTO.setStatus(request.getStatus());
         log.info("Mapped to OrderDTO: {}", orderDTO);
-        OrderDTO savedOrder = orderService.createOrderSyncViaSoap(orderDTO);
+        OrderDTO savedOrder = orderService.createOrder(orderDTO);
         log.info("Order saved: id={}, itemId={}, quantity={}, date={}, status={}",
                 savedOrder.getId(), savedOrder.getItemId(), savedOrder.getQuantity(), savedOrder.getOrderDate(), savedOrder.getStatus());
 

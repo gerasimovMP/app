@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class JaksonConfig {
     @Primary
-    @Bean(name = "jaksonObjectMapper")  // Переименовываем бин
+    @Bean(name = "jaksonObjectMapper")
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());  // Регистрируем модуль для работы с Java 8 датами
+        objectMapper.registerModule(new JavaTimeModule());  
         return objectMapper;
     }
 }
